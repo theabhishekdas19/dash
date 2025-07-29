@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependabot Alerts</title>
+    
+    <!-- CSS Files - Using Flask url_for for proper static file paths -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-icon">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM4.5 6a.5.5 0 0 1 .5-.5h2V4a.5.5 0 0 1 1 0v1.5h2a.5.5 0 0 1 0 1h-2V8a.5.5 0 0 1-1 0V6.5H5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </div>
+            <h1>Dependabot Alerts</h1>
+            <div class="header-subtitle">Manage and resolve security vulnerabilities in your repositories</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <label class="sidebar-label">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub Organization
+                </label>
+                <input id="org-input" placeholder="e.g. octocat" class="sidebar-input"/>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                    Filter Repositories
+                </label>
+                <input id="filter-input" placeholder="Type to search repositories..." class="sidebar-input"/>
+                <button id="search-btn" class="btn btn-primary">
+                    <span class="btn-text">Search Repos</span>
+                    <div class="btn-loader hidden">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-subheading">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                    </svg>
+                    Repositories
+                </h3>
+                <ul class="repo-list" id="repo-list">
+                    <!-- Repository list will be populated here -->
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-subheading">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                    </svg>
+                    Security Summary
+                </h3>
+                <div id="summary" class="summary-container">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Repositories:</span>
+                        <span id="total-count" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-badges">
+                        <div class="badge badge-critical">
+                            <div class="badge-dot"></div>
+                            Critical: <span id="c-count">0</span>
+                        </div>
+                        <div class="badge badge-high">
+                            <div class="badge-dot"></div>
+                            High: <span id="h-count">0</span>
+                        </div>
+                        <div class="badge badge-medium">
+                            <div class="badge-dot"></div>
+                            Medium: <span id="m-count">0</span>
+                        </div>
+                        <div class="badge badge-low">
+                            <div class="badge-dot"></div>
+                            Low: <span id="l-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <button id="load-btn" class="btn btn-secondary" disabled>
+                    <span class="btn-text">Load Alerts</span>
+                    <div class="btn-loader hidden">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="cards-container" class="cards-grid">
+                <!-- Alert cards will be populated here -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <div class="empty-state-icon">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM4.5 6a.5.5 0 0 1 .5-.5h2V4a.5.5 0 0 1 1 0v1.5h2a.5.5 0 0 1 0 1h-2V8a.5.5 0 0 1-1 0V6.5H5a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                </div>
+                <h3>No alerts loaded</h3>
+                <p>Select a repository from the sidebar and click "Load Alerts" to view security vulnerabilities.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI Assist Modal -->
+    <div class="modal-bg" id="assist-bg">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                    </svg>
+                    AI Security Assistant
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div id="assist-content" class="assist-content">
+                    <div class="assist-thinking">
+                        <div class="thinking-animation">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>Analyzing vulnerability...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                        <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM4.5 6a.5.5 0 0 1 .5-.5h2V4a.5.5 0 0 1 1 0v1.5h2a.5.5 0 0 1 0 1h-2V8a.5.5 0 0 1-1 0V6.5H5a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    Create Pull Request
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading repositories...</p>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- JavaScript Files - Using Flask url_for for proper static file paths -->
+    <script src="{{ url_for('static', filename='js/utils/constants.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/helpers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/services/github-api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/services/ai-service.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/alert-card.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/ai-assist-modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/summary.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

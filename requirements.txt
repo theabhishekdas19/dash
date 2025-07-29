@@ -1,0 +1,56 @@
+# Flask web framework
+
+Flask==3.0.2
+
+
+
+# Environment variables management
+
+python-dotenv==1.0.1
+
+
+
+# HTTP requests library
+
+requests==2.32.1
+
+
+
+# LangChain OpenAI integration
+
+langchain-openai==0.1.10
+
+
+
+# LangChain core functionality
+
+langchain-core==0.2.4
+
+
+
+# Additional useful packages
+
+# Gunicorn for production deployment (uncomment if needed)
+
+# gunicorn==21.2.0
+
+
+
+# Redis for caching (uncomment if implementing caching)
+
+# redis==5.0.1
+
+
+
+# SQLAlchemy for database operations (uncomment if adding database)
+
+# SQLAlchemy==2.0.23
+
+
+
+# Pytest for testing (uncomment for development)
+
+# pytest==7.4.3
+
+
+
